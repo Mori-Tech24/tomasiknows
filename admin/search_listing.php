@@ -174,8 +174,8 @@ if (!empty($searchCriteria)) {
     if ($query->rowCount() > 0) {
         foreach ($results as $row) {
 ?>
-            <div class="col-md-3 card-2">
-                <div class="card">
+              <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card shadow-sm" style="border-radius: 10px;">
                     <div class="container">
                         <a href="search_listing_detail.php?lid=<?php echo $row->ID; ?>">
                             <img  class="card-img-top rounded-circle"   src="<?php echo explode(',', "".$row->Logo)[0]; ?>" height="250" width="200" alt="Card image cap">
