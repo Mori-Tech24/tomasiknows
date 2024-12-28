@@ -1,9 +1,8 @@
  <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4" style="background-color: #107DC4; !important">
     <!-- Brand Logo -->
-    <a href="dashboard.php" class="brand-link" style="font-weight:bold; font-size:22px;">
-    
-
+    <a href="dashboard.php" class="brand-link" style="font-weight:bold; font-size:20px;">
+      <img src="../bg/logo.jpg" alt="System Logo" class="brand-image img-circle elevation-3" style="opacity: .8; width: 35px; margin-right: 10px;">
       <span class="brand-text font-weight-light">TomasiKnows | <?php echo ($_SESSION['usertype']) == 1 ? "Admin" : "B.O."?></span>
     </a>
 
@@ -76,7 +75,7 @@ foreach($results as $row)
         
           </li>
           
-          <li class="nav-item has-treeview d-none">
+          <li class="nav-item has-treeview  <?php echo ($_SESSION['usertype']) == 1 ? "" : "d-none"?>">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-copy"></i>
               <p>
