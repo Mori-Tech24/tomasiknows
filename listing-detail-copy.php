@@ -407,17 +407,19 @@ foreach($results as $row)
 
                     },
                     success :function(response) {
+                        // console.log(response);
                         if(response[1] > 0) {
-                            $("#div_review_one").removeClass("d-none");
+                            $("#div_review_one").remove()
                            
                             // $("#div_review_two").remove();
 
-                        }else {
-                            $("#div_review_one").remove();
-                    
-                            // $("#div_review_two").removeClass("d-none");
-
                         }
+                        // else {
+                        //     $("#div_review_one").remove();
+                    
+                        //     // $("#div_review_two").removeClass("d-none");
+
+                        // }
                     }
 
                 });
