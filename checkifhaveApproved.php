@@ -4,10 +4,11 @@
     if(isset($_POST['checkifaaproved'])) {
 
         $userid = $_POST['userid'];
+        $listing_id = $_POST['listing_id'];
 
         try {
-            $stmt = $dbh->prepare("SELECT id FROM tbl_reservations WHERE user_id= :user_id AND reservation_status = 1");
-            $stmt->execute(['user_id'=>$userid]);
+            $stmt = $dbh->prepare("SELECT id FROM tbl_reservations WHERE user_id= :user_id AND reservation_status = 1 AND listing_id = :listing_id");
+            $stmt->execute(['user_id'=>$userid, 'listing_id'=>$listing_id]);
 
             $count = $stmt->rowCount();
 

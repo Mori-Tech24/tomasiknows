@@ -285,11 +285,11 @@ foreach($results as $row)
                             </div></form>
                         </div>
                     </div>
-                    <div class="booking-checkbox_wrap my-4 d-none" id="div_review_two">
+                    <div class="booking-checkbox_wrap my-4" id="div_review_two">
                         <?php
                         $lid=$_GET['lid'];
                                             
-                        $ret="SELECT * FROM tblreview WHERE ListingID='$lid' AND STATUS='Review Accept'";
+                        $ret="SELECT * FROM tblreview WHERE ListingID='$lid' AND STATUS='Review Accept' ORDER BY ID DESC LIMIT 1";
 
                         $query1 = $dbh -> prepare($ret);
                         // $query1-> bindParam(':lid', $lid, PDO::PARAM_STR);
@@ -392,7 +392,7 @@ foreach($results as $row)
             if(userid == "") {
 
                 $("#div_review_one").remove();
-                $("#div_review_two").remove();
+               // $("#div_review_two").remove();
                 
             }else {
 
@@ -403,19 +403,19 @@ foreach($results as $row)
                     method : "post",
                     dataType : "json",
                     data : {
-                        checkifaaproved, userid
+                        checkifaaproved, userid, listing_id
 
                     },
                     success :function(response) {
-                        if(response[1] == 0) {
-
-                            $("#div_review_one").remove();
-                            $("#div_review_two").remove();
+                        if(response[1] > 0) {
+                            $("#div_review_one").removeClass("d-none");
+                           
+                            // $("#div_review_two").remove();
 
                         }else {
-
-                            $("#div_review_one").removeClass("d-none");
-                            $("#div_review_two").removeClass("d-none");
+                            $("#div_review_one").remove();
+                    
+                            // $("#div_review_two").removeClass("d-none");
 
                         }
                     }
