@@ -62,7 +62,7 @@ include('includes/dbconnection.php');
         }
 
         .modal-content {
-            background-color: #000;
+            /* background-color: #000; */
             color: white;
         }
 
@@ -127,7 +127,7 @@ include('includes/dbconnection.php');
                 <div class="modal-body">
                     <form name="search" action="search-listing.php" method="post">
                         <div class="form-group">
-                            <label>What?</label>
+                            <label style="color:black">What?</label>
                             <select class="form-control" id="categories" name="categories">
                                 <option value="all-categories" selected>Select Category</option>
                                 <option value="all-categories">All categories</option>
@@ -144,12 +144,12 @@ include('includes/dbconnection.php');
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Where?</label>
+                            <label style="color:black">Where?</label>
                             <input type="text" id="location" name="location" class="form-control" placeholder="Barangay">
                         </div>
                         <button type="submit" class="btn btn-primary" style="background-color: rgba(31, 139, 255, 0.8); border-color: rgba(31, 139, 255, 0.8);">Search →</button>
                     </form>
-                    <p class="terms">By using this website, you are agreeing to our <a href="#">terms and conditions</a></p>
+                    <p class="terms" style="color:black">By using this website, you are agreeing to our <a href="#">terms and conditions</a></p>
                 </div>
             </div>
         </div>
