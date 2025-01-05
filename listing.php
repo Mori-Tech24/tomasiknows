@@ -118,33 +118,48 @@ if (!empty($searchCriteria)) {
 
                     <div class="row">
                     <?php
-                        if ($query->rowCount() > 0) {
-                            foreach ($results as $row) {
-                                ?>
-                                <div class="col-md-3 card-2">
-                                    <div class="card">
-                                    <a href="listing-detail-copy.php?lid=<?php echo $row->ID; ?>">
-                                    <img class="card-img-top rounded-circle" 
-        src="<?php echo ltrim(explode(',', $row->Logo)[0], './'); ?>" 
-        height="250" 
-        width="200" 
-        alt="Card image cap">
-                                        </a>
-                                        <div class="card-body text-center" style="text-transform: uppercase;">
-                                                <a href="listing-detail-copy.php?lid=<?php echo $row->ID; ?>" class="text-decoration-none" style="text-transform: uppercase;"><?php echo $row->ListingTitle; ?></a>
-                                            <p><?php echo $row->State; ?></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <?php
-                            }
-                        } else {
-                            echo "<div class='text-center w-100 mt-5'>
-                            <h3 class='shadow-box' style='color:white'>No listings found for the given criteria.</h3>
-                            <a href='index.php' class='btn btn-primary mt-3'>Go Back</a>
-                          </div>";
-                        }
-                    ?>
+if ($query->rowCount() > 0) {
+    foreach ($results as $row) {
+        // Query to get the count of ratings for each listing
+        $stmt = $dbh->prepare("SELECT COUNT(id) AS rating_count FROM tbl_listing_ratings WHERE listing_id = :listing_id");
+        $stmt->execute(['listing_id' => $row->ID]);
+        $rating = $stmt->fetch(PDO::FETCH_ASSOC);
+        $ratingCount = $rating['rating_count'] ?? 0; // Default to 0 if no ratings
+        ?>
+        <div class="col-md-3 card-2">
+            <div class="card">
+                <a href="listing-detail-copy.php?lid=<?php echo $row->ID; ?>">
+                    <img class="card-img-top rounded-circle" 
+                        src="<?php echo ltrim(explode(',', $row->Logo)[0], './'); ?>" 
+                        height="250" 
+                        width="200" 
+                        alt="Card image cap">
+                </a>
+                <div class="card-body text-center" style="text-transform: uppercase;">
+                    <a href="listing-detail-copy.php?lid=<?php echo $row->ID; ?>" class="text-decoration-none" style="text-transform: uppercase;">
+                        <?php echo $row->ListingTitle; ?>
+                    </a>
+                    <p><?php echo $row->State; ?></p>
+
+                    <!-- Heart icon with rating count -->
+                    <div class="rating-section mt-2">
+                        <i class="fa <?php echo $ratingCount > 0 ? 'fa-heart' : 'fa-heart-o'; ?>" style="color:red;"></i>
+                        <span><?php echo $ratingCount; ?></span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+} else {
+    echo "<div class='text-center w-100 mt-5'>
+            <h3 class='shadow-box' style='color:white'>No listings found for the given criteria.</h3>
+            <a href='index.php' class='btn btn-primary mt-3'>Go Back</a>
+          </div>";
+}
+?>
+
                     </div>
                 </div>
             </div>

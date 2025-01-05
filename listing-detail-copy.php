@@ -53,6 +53,26 @@ if(isset($_GET['lid'])) {
 
 }
 
+
+if(isset($_POST['action'])){
+    $listing_id = $_POST['listing_id'];
+    $rate_userid = $_POST['rate_userid'];
+    $action = $_POST['action'];
+    
+    
+    if ($action == 'add') {
+        $stmt = $dbh->prepare("INSERT INTO tbl_listing_ratings (listing_id, user_id) VALUES (:listing_id, :user_id)");
+        $stmt->execute(['listing_id' =>$listing_id, 'user_id' =>$rate_userid]);
+        echo "Rating Added.";
+    } elseif ($action == 'remove') {
+        $stmt = $dbh->prepare("DELETE FROM tbl_listing_ratings WHERE listing_id = :listing_id AND user_id = :user_id");
+        $stmt->execute(['listing_id' =>$listing_id, 'user_id' => $rate_userid]);
+        echo "Rating Removed.";
+    }
+
+}
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -216,16 +236,66 @@ foreach($results as $row)
     <section class="reserve-block">
         <div class="container">
             <div class="row">
-                <div class="col-md-9">
-                    <h5><?php echo $row->ListingTitle;?></h5>
-                 
-                    
-                </div>
+            <div class="col-md-9">
+                <?php
+                // Query to get total rating count for the listing
+                $stmt = $dbh->prepare("SELECT COUNT(id) AS total_ratings FROM tbl_listing_ratings WHERE listing_id = :listing_id");
+                $stmt->execute(['listing_id' => $lid]);
+                $rating = $stmt->fetch(PDO::FETCH_ASSOC);
+                $totalRatings = $rating['total_ratings'] ?? 0;
+                ?>
+                <h5>
+                    <?php echo $row->ListingTitle; ?>
+                    <span class="badge bg-danger">
+                        <i class="fa fa-heart"></i> <?php echo $totalRatings; ?>
+                    </span>
+                </h5>
+            </div>
                 <div class="col-md-3">
-                    <div class="pull-right">
-                        <button type="button" class="btn btn-success" id="button_reservation" name="button_reservation">Book a Reservation</button>
+                    <div class="pull-right d-flex align-items-center">
+                        <button type="button" class="btn btn-success me-2" id="button_reservation" name="button_reservation">
+                            Book a Reservation
+                        </button>
+                        &nbsp;
+                        <?php
+
+                            if(!isset($_SESSION['lssemsuid'] )) {
+
+                                echo "";
+                            }else {
+
+                                $checkifHaveRating = $dbh->prepare("SELECT * FROM tbl_listing_ratings WHERE listing_id = :listing_id AND user_id = :user_id ORDER BY id DESC LIMIT 1");
+                                $checkifHaveRating->execute(['listing_id' => $lid, 'user_id' => $_SESSION['lssemsuid']]);
+                                $countcheckifHaveRating = $checkifHaveRating->rowCount();
+    
+                                if ($countcheckifHaveRating > 0) {
+                                    echo "
+                                        <form method='post' id='ratingForm'>
+                                            <input type='hidden' name='listing_id' value='$lid'>
+                                            <input type='hidden' name='action' value='remove'>
+                                            <input type='hidden' name='rate_userid' value='" . $_SESSION['lssemsuid'] . "'>
+                                            <button type='submit' style='cursor: pointer;' title='Remove Rating' class='btn btn-outline-danger' id='heart_button'>
+                                                <i class='fa fa-heart'></i>
+                                            </button>
+                                        </form>
+                                    ";
+                                } else {
+                                    echo "
+                                        <form method='post' id='ratingForm'>
+                                            <input type='hidden' name='listing_id' value='$lid'>
+                                            <input type='hidden' name='action' value='add'>
+                                            <input type='hidden' name='rate_userid' value='" . $_SESSION['lssemsuid'] . "'>
+                                            <button type='submit' style='cursor: pointer;' title='Add Rating' class='btn btn-outline-danger' id='heart_button'>
+                                                <i class='fa fa-heart-o'></i>
+                                            </button>
+                                        </form>
+                                    ";
+                                }
+                            }
+                        ?>
                     </div>
                 </div>
+
             </div>
           
         </div>
@@ -395,8 +465,6 @@ foreach($results as $row)
                // $("#div_review_two").remove();
                 
             }else {
-
-
                 // check if with approved 
                 $.ajax({
                     url: "checkifhaveApproved.php",
@@ -408,18 +476,32 @@ foreach($results as $row)
                     },
                     success :function(response) {
                         console.log(response);
-                        if(response[1] > 0) {
-                            $("#div_review_one").removeClass("d-none");
-                           console.log("ok");
-                            // $("#div_review_two").remove();
 
-                        } else {
-                            $("#div_review_one").remove();
-                            // $("#div_review_one").remove()
-                    
-                            // $("#div_review_two").removeClass("d-none");
+                        if(response[0] == "success") {
+                            if(response[1] > 0) {
+                                $("#div_review_one").removeClass("d-none");
+                                $("#heart_button").removeClass("d-none");
+
+                                
+                            console.log("ok");
+                                // $("#div_review_two").remove();
+
+                            } else {
+                                $("#div_review_one").remove();
+                                // $("#div_review_one").remove()
+                        
+                                // $("#div_review_two").removeClass("d-none");
+
+                            }
+
+                        }else {
+
+                            $("#heart_button").addClass("d-none");
 
                         }
+
+
+                       
                     }
 
                 });
@@ -514,6 +596,54 @@ foreach($results as $row)
                 }
             });
         }
+    </script>
+    <script>
+ document.querySelectorAll('#ratingForm').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('listing-detail-copy.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(result => {
+            // console.log(result.trim());
+            const icon = this.querySelector('i');
+            const actionInput = this.querySelector('input[name="action"]');
+            const button = this.querySelector('button');
+
+            if (result.trim() === 'added') {
+                icon.classList.remove('fa-heart-o');
+                icon.classList.add('fa-heart');
+                button.title = 'Remove Rating';
+                actionInput.value = 'remove';
+            } else if (result.trim() === 'removed') {
+                icon.classList.remove('fa-heart');
+                icon.classList.add('fa-heart-o');
+                button.title = 'Add Rating';
+                actionInput.value = 'add';
+            } else {
+    
+                if(button.title == "Add Rating") {
+                    alert("Rating Added.");
+                    location.reload();
+                }else {
+                    alert("Rating Removed.");
+                    location.reload();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to process your request. Please check your connection.');
+        });
+    });
+});
+
+
     </script>
 
 </body>
