@@ -247,13 +247,13 @@ foreach($results as $row)
                 <h5>
                     <?php echo $row->ListingTitle; ?>
                     <span class="badge bg-danger">
-                        <i class="fa fa-heart"></i> <?php echo $totalRatings; ?>
+                        <i class="fa fa-heart" style="font-size: 20px"></i> <?php echo $totalRatings; ?>
                     </span>
                 </h5>
             </div>
                 <div class="col-md-3">
                     <div class="pull-right d-flex align-items-center">
-                        <button type="button" class="btn btn-success me-2" id="button_reservation" name="button_reservation">
+                        <button type="button" style="cursor: pointer;" class="btn btn-success me-2" id="button_reservation" name="button_reservation">
                             Book a Reservation
                         </button>
                         &nbsp;

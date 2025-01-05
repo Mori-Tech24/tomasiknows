@@ -143,7 +143,7 @@ if ($query->rowCount() > 0) {
 
                     <!-- Heart icon with rating count -->
                     <div class="rating-section mt-2">
-                        <i class="fa <?php echo $ratingCount > 0 ? 'fa-heart' : 'fa-heart-o'; ?>" style="color:red;"></i>
+                        <i class="fa <?php echo $ratingCount > 0 ? 'fa-heart' : 'fa-heart-o'; ?>" style="color:red; font-size: 24px;"></i>
                         <span><?php echo $ratingCount; ?></span>
                     </div>
 
