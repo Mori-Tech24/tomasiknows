@@ -43,8 +43,9 @@ include('includes/dbconnection.php');
                     </div>
                     <div class="row">
     <?php
-    $categories = $_POST['categories'];
-    $location = $_POST['location'];
+$categories = isset($_GET['categories']) ? $_GET['categories'] : 'all-categories';
+$location = isset($_GET['location']) ? $_GET['location'] : '';
+
 
     // Build dynamic SQL
     $sql = "SELECT * FROM tbllisting WHERE 1=1"; // Base query

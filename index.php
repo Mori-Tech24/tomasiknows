@@ -125,7 +125,7 @@ include('includes/dbconnection.php');
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="search" action="search-listing.php" method="post">
+                    <form name="search" action="search-listing.php" method="get">
                         <div class="form-group">
                             <label style="color:black">What?</label>
                             <select class="form-control" id="categories" name="categories">

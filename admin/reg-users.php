@@ -144,7 +144,7 @@ if (strlen($_SESSION['lssemsaid'] == 0)) {
   </div>
   <div class="card-body">
     <!-- Filters -->
-    <div class="row mb-3">
+    <div class="row mb-3 d-none">
       <div class="col-md-3">
         <input type="text" id="searchInput" class="form-control" placeholder="Search by Business Name or Email">
       </div>
