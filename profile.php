@@ -151,7 +151,9 @@ if (strlen($_SESSION['lssemsuid'] == 0)) {
                                             tbl_reservations a
                                         LEFT JOIN
                                             tbllisting b ON b.ID = a.listing_id
-                                        WHERE a.user_id = :uid";
+                                        WHERE a.user_id = :uid
+                                        ORDER BY a.id DESC
+                                        ";
                                 $query = $dbh->prepare($sql);
                                 $query->bindParam(':uid', $uid, PDO::PARAM_STR);
                                 $query->execute();
