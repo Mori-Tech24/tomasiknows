@@ -195,7 +195,18 @@ foreach($results as $row)
         <div class="container">
             <div class="row">
                 <div class="col-md-9">
-                    <h5><?php echo $row->ListingTitle;?></h5>
+                <?php
+                // Query to get total rating count for the listing
+                $stmt = $dbh->prepare("SELECT COUNT(id) AS total_ratings FROM tbl_listing_ratings WHERE listing_id = :listing_id");
+                $stmt->execute(['listing_id' => $lid]);
+                $rating = $stmt->fetch(PDO::FETCH_ASSOC);
+                $totalRatings = $rating['total_ratings'] ?? 0;
+                ?>
+                    <h5><b><?php echo $row->ListingTitle;?></b>
+                    <span class="badge bg-danger">
+                        <i class="fa fa-heart" style="font-size: 20px"></i> <?php echo $totalRatings; ?>
+                    </span>
+                    </h5>
                  
                     <p class="reserve-description"><?php echo substr($row->Description,-100);?></p>
                 </div>

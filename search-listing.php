@@ -48,7 +48,7 @@ $location = isset($_GET['location']) ? $_GET['location'] : '';
 
 
     // Build dynamic SQL
-    $sql = "SELECT * FROM tbllisting WHERE 1=1"; // Base query
+    $sql = "SELECT * FROM tbllisting WHERE 1=1  AND isDeleted = 0"; // Base query
 
     // Add category filter if not "all-categories"
     if ($categories !== 'all-categories') {
@@ -63,7 +63,14 @@ $location = isset($_GET['location']) ? $_GET['location'] : '';
     $results = $query->fetchAll(PDO::FETCH_OBJ);
 
     if ($query->rowCount() > 0) {
-        foreach ($results as $row) { ?>
+        foreach ($results as $row) { 
+            
+            $stmt = $dbh->prepare("SELECT COUNT(id) AS rating_count FROM tbl_listing_ratings WHERE listing_id = :listing_id");
+            $stmt->execute(['listing_id' => $row->ID]);
+            $rating = $stmt->fetch(PDO::FETCH_ASSOC);
+            $ratingCount = $rating['rating_count'] ?? 0; // Default to 0 if no ratings
+            
+            ?>
             <div class="col-md-2 col-sm-4 col-6 mb-3">
                 <div class="card shadow-sm" style="border-radius: 10px;">
                     <a href="listing-detail-copy.php?lid=<?php echo $row->ID; ?>">
@@ -78,6 +85,10 @@ $location = isset($_GET['location']) ? $_GET['location'] : '';
                             <?php echo $row->ListingTitle; ?>
                         </a>
                         <p class="card-text"><?php echo $row->State; ?></p>
+                        <div class="rating-section mt-2">
+                            <i class="fa <?php echo $ratingCount > 0 ? 'fa-heart' : 'fa-heart-o'; ?>" style="color:red; font-size: 24px;"></i>
+                            <span><?php echo $ratingCount; ?></span>
+                        </div>
                     </div>
                 </div>
             </div>

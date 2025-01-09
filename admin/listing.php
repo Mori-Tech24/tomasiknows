@@ -23,7 +23,7 @@ $sql="UPDATE tbllisting set isDeleted = 1 where ID=:rid";
 $query=$dbh->prepare($sql);
 $query->bindParam(':rid',$rid,PDO::PARAM_STR);
 $query->execute();
- echo "<script>alert('Data deleted');</script>"; 
+ echo "<script>alert('Listing deleted');</script>"; 
   echo "<script>window.location.href = 'listing.php'</script>";     
 
 

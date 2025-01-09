@@ -70,7 +70,7 @@ if (strlen($_SESSION['lssemsaid']==0)) {
                        <?php
 $vid=intval($_GET['viewid']);
 $sql="SELECT * from  tbllisting 
-join tblcategory on tblcategory.ID=tbllisting.Category join tbluser on tbluser.ID=tbllisting.UserID
+left join tblcategory on tblcategory.ID=tbllisting.Category left join tbluser on tbluser.ID=tbllisting.UserID
 where tbllisting.ID=:vid";
 $query = $dbh -> prepare($sql);
 $query-> bindParam(':vid', $vid, PDO::PARAM_STR);

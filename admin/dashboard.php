@@ -70,7 +70,7 @@ include('includes/dbconnection.php');
       <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
         <div class="row">
-          <div class="col-lg-4 col-4">
+          <div class="col-lg-4 col-4  <?php echo ($_SESSION['usertype'] == 2) ? "d-none" : ""; ?>">
            <?php 
 
             if($_SESSION['usertype'] == 1) {
@@ -173,7 +173,21 @@ $totperson=$query->rowCount();
               <div class="icon">
                 <i class="ion ion-bag"></i>
               </div>
-              <a href="listing.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+
+              <?php 
+if ($_SESSION['usertype'] == 2) { 
+?>
+    <a href="manage_listing.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+<?php 
+} else { 
+?>
+    <a href="listing.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+<?php 
+} 
+?>
+
+              
+         
             </div>
           </div>
         </div>

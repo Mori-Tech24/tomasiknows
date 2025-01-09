@@ -74,7 +74,7 @@ if (!empty($categories)) {
 }
 
 // Build SQL query with flexible conditions
-$sql = "SELECT * FROM tbllisting"; // Starting SQL query
+$sql = "SELECT * FROM tbllisting where isDeleted = 0"; // Starting SQL query
 $conditions = []; // Array to hold all conditions
 
 // Add condition for category if provided

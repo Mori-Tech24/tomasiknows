@@ -359,7 +359,7 @@ foreach($results as $row)
                         <?php
                         $lid=$_GET['lid'];
                                             
-                        $ret="SELECT * FROM tblreview WHERE ListingID='$lid' AND STATUS='Review Accept' ORDER BY ID DESC LIMIT 1";
+                        $ret="SELECT * FROM tblreview WHERE ListingID='$lid' AND STATUS='Review Accept' ORDER BY ID DESC";
 
                         $query1 = $dbh -> prepare($ret);
                         // $query1-> bindParam(':lid', $lid, PDO::PARAM_STR);

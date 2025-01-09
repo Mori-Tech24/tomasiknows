@@ -2,7 +2,7 @@
 session_start();
 error_reporting(0);
 include('includes/dbconnection.php');
-if (strlen($_SESSION['lssemsaid']==0)) {
+if (strlen($_SESSION['lssemsaid']==0) || $_SESSION['lssemsaid']!=1) {
   header('location:logout.php');
   } else{
     if(isset($_POST['submit']))

@@ -28,6 +28,7 @@ if (strlen($_SESSION['lssemsaid'] == 0)) {
   <!-- DataTables -->
   <link rel="stylesheet" href="plugins/datatables-bs4/css/dataTables.bootstrap4.css">
   <!-- Theme style -->
+  <link rel="stylesheet" href="../css/font-awesome.min.css">
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <!-- Google Font: Source Sans Pro -->
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
@@ -173,6 +174,12 @@ if (!empty($searchCriteria)) {
 <?php
     if ($query->rowCount() > 0) {
         foreach ($results as $row) {
+
+          $stmt = $dbh->prepare("SELECT COUNT(id) AS rating_count FROM tbl_listing_ratings WHERE listing_id = :listing_id");
+          $stmt->execute(['listing_id' => $row->ID]);
+          $rating = $stmt->fetch(PDO::FETCH_ASSOC);
+          $ratingCount = $rating['rating_count'] ?? 0; // Default to 0 if no ratings
+          
 ?>
               <div class="col-md-2 col-sm-4 col-6 mb-3">
                 <div class="card shadow-sm" style="border-radius: 10px;">
@@ -185,6 +192,10 @@ if (!empty($searchCriteria)) {
                                 <a href="search_listing_detail.php?lid=<?php echo $row->ID; ?>" class="text-decoration-none" style="text-transform: uppercase;"><?php echo $row->ListingTitle; ?></a>
                        
                             <p class="card-text"><?php echo $row->State; ?></p>
+                              <div class="rating-section mt-2">
+                                <i class="fa <?php echo $ratingCount > 0 ? 'fa-heart' : 'fa-heart-o'; ?>" style="color:red; font-size: 24px;"></i>
+                                <span><?php echo $ratingCount; ?></span>
+                            </div>
                         </div>
                         <hr>
                     </div>

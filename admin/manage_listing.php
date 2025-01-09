@@ -10,13 +10,13 @@ if ($_SESSION['usertype']!=2) {
 
 if(isset($_GET['delid']))
 {
-$rid=intval($_GET['delid']);
-$sql="delete from tbllisting where ID=:rid";
+$rid=$_GET['delid'];
+$sql="UPDATE tbllisting set isDeleted = 1 where ID=:rid";
 $query=$dbh->prepare($sql);
 $query->bindParam(':rid',$rid,PDO::PARAM_STR);
 $query->execute();
- echo "<script>alert('Data deleted');</script>"; 
-  echo "<script>window.location.href = 'manage-listing.php'</script>";     
+ echo "<script>alert('Listing deleted');</script>"; 
+  echo "<script>window.location.href = 'manage_listing.php'</script>";     
 
 
 }
@@ -79,7 +79,7 @@ $query->execute();
                                 <tbody>
                                 <?php 
 $userid=$_SESSION['lssemsuid'];                                     
-$ret="SELECT * from tbllisting where UserID=:userid";
+$ret="SELECT * from tbllisting where UserID=:userid AND isDeleted = 0";
 $query = $dbh -> prepare($ret);
 $query->bindParam(':userid', $_SESSION['lssemsaid'],PDO::PARAM_STR);
 $query->execute();
@@ -95,7 +95,7 @@ foreach($results as $row)
                                                         <td><?php  echo htmlentities($row->ListingTitle);?></td>
                                                         </td><td><?php  echo htmlentities($row->Email);?></td><td><?php  echo htmlentities($row->Phone);?></td>
                                                         <td><?php  echo htmlentities($row->ListingDate);?></td>
-                                                        <td><a href="edit_listing.php?editid=<?php echo htmlentities ($row->ID);?>">Edit</a> | <a href="manage-listing.php?delid=<?php echo ($row->ID);?>" onclick="return confirm('Do you really want to Delete ?');">Delete</a></td>
+                                                        <td><a href="edit_listing.php?editid=<?php echo htmlentities ($row->ID);?>">Edit</a> | <a href="manage_listing.php?delid=<?php echo ($row->ID);?>" onclick="return confirm('Do you really want to Delete ?');">Delete</a></td>
                                                         
                                                     </tr>
                                                    <?php $cnt=$cnt+1;}} ?> 
