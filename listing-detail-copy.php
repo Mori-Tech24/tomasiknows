@@ -549,6 +549,7 @@ foreach($results as $row)
                             $("#reservationForm").trigger("reset");
                             setTimeout(function() { 
                                 $("#modal_reservation").modal("hide");
+                                location.reload();
                             }, 1000);
                            
                         }
