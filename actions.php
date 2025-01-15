@@ -1,5 +1,7 @@
 <?php
+
 include('includes/dbconnection.php');
+date_default_timezone_set('Asia/Manila');
 
 if (isset($_POST['act']) && $_POST['act'] == "book_reservation") {
 
@@ -9,11 +11,13 @@ if (isset($_POST['act']) && $_POST['act'] == "book_reservation") {
     $reservation_date = (empty($_POST['reservation_date'])) ? NULL : $_POST['reservation_date'];
     $reservation_time = (empty($_POST['reservation_time'])) ? NULL : $_POST['reservation_time'];
     $reservation_purpose = (empty($_POST['reservation_purpose'])) ? NULL : $_POST['reservation_purpose'];
-
+    $reservation_datetime = strtotime($reservation_date . " " . $reservation_time);
     try {
-        if ($reservation_date < date("Y-m-d")) {
+        if ($reservation_datetime < time()) {
             $output = array("danger", "Error", "Invalid Date or Date already Passed.");
         } else {
+
+            
 
             $checkifhaveReservation = $dbh->prepare("SELECT * FROM tbl_reservations WHERE user_id = :user_id
                             AND reservation_date = :reservation_date
@@ -114,14 +118,8 @@ if (isset($_POST['act']) && $_POST['act'] == "book_reservation") {
                     $output = array("danger", "Error", "Failed to submit reservation.");
                 }
 
-
-
             }
 
-
-
-
-   
         }
     } catch (PDOException $e) {
         if (str_contains($e->getMessage(), "reservation_time")) {
