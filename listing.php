@@ -72,9 +72,51 @@ if (!empty($categories)) {
         $searchCriteria[] = "Category: " . htmlspecialchars($categoryResult->Category);
     }
 }
-
 // Build SQL query with flexible conditions
-$sql = "SELECT * FROM tbllisting where isDeleted = 0"; // Starting SQL query
+if (isset($_GET['filter']) && $_GET['filter'] == 1) {
+    $sql = "SELECT a.*, 
+                (SELECT COUNT(b.id) 
+                 FROM tbl_reservations b 
+                 WHERE b.listing_id = a.ID AND b.reservation_status = 1) AS reservation_count 
+            FROM tbllisting a 
+            WHERE isDeleted = 0 
+            ORDER BY reservation_count DESC"; // Query for Most Booked
+
+} else if (isset($_GET['filter']) && $_GET['filter'] == 2) {
+    $sql = "SELECT a.*, 
+                (SELECT COUNT(b.id) 
+                 FROM tbl_listing_ratings b 
+                 WHERE b.listing_id = a.ID) AS rating_count 
+            FROM tbllisting a 
+            WHERE isDeleted = 0 
+            ORDER BY rating_count DESC"; // Query for Most Heart
+
+} else if (isset($_GET['filter']) && $_GET['filter'] == 3) {
+ // Query for Near Me
+    $get_lat  = isset($_GET['lat']) ? (float)$_GET['lat'] : 0; // Get latitude
+    $get_long = isset($_GET['long']) ? (float)$_GET['long'] : 0; // Get longitude
+
+    // Check if latitude and longitude are valid
+    if ($get_lat && $get_long) {
+        $sql = "SELECT a.*, 
+                    (6371 * acos(
+                        cos(radians($get_long)) * 
+                        cos(radians(a.latitude)) * 
+                        cos(radians(a.longitude) - radians($get_lat)) + 
+                        sin(radians($get_long)) * 
+                        sin(radians(a.latitude))
+                    )) AS distance 
+                FROM tbllisting a 
+                WHERE isDeleted = 0 
+                HAVING distance < 50 -- Distance filter in kilometers
+                ORDER BY distance ASC"; // Order by nearest distance
+    } else {
+        $sql = "SELECT * FROM tbllisting WHERE isDeleted = 0"; // Default query if no lat/long provided
+    }
+} else {
+    $sql = "SELECT * FROM tbllisting WHERE isDeleted = 0"; // Default query
+}
+
 $conditions = []; // Array to hold all conditions
 
 // Add condition for category if provided
@@ -116,7 +158,24 @@ if (!empty($searchCriteria)) {
 }
 ?>
 
-                    <div class="row">
+
+<div class="row">
+<div class="col-md-9">
+        <!-- Listings content -->
+    </div>
+    <?php
+// Get the 'filter' value from the query string
+$filter = isset($_GET['filter']) ? $_GET['filter'] : 0;
+?>
+<div class="col-md-3 d-flex justify-content-end align-items-center">
+    <select class="form-control" name="select-filter" id="select-filter">
+        <option value="0" <?php echo $filter == 0 ? 'selected' : ''; ?>>Select Filter</option>
+        <option value="1" <?php echo $filter == 1 ? 'selected' : ''; ?>>Most Booked</option>
+        <option value="2" <?php echo $filter == 2 ? 'selected' : ''; ?>>Most Heart</option>
+        <option value="3" <?php echo $filter == 3 ? 'selected' : ''; ?>>Near Me</option>
+    </select>
+</div>
+<br><br><br>
                     <?php
 if ($query->rowCount() > 0) {
     foreach ($results as $row) {
@@ -126,6 +185,7 @@ if ($query->rowCount() > 0) {
         $rating = $stmt->fetch(PDO::FETCH_ASSOC);
         $ratingCount = $rating['rating_count'] ?? 0; // Default to 0 if no ratings
         ?>
+   
         <div class="col-md-3 card-2">
             <div class="card">
                 <a href="listing-detail-copy.php?lid=<?php echo $row->ID; ?>">
@@ -172,3 +232,60 @@ if ($query->rowCount() > 0) {
     <?php include_once('includes/signup_footer.php'); ?>
 </body>
 </html>
+<script>
+
+let latitude  = "";
+let longitude = "";
+
+if (navigator.geolocation) {
+  // Request the current position
+  navigator.geolocation.getCurrentPosition(
+    function (position) {
+      // Success callback
+      latitude = position.coords.latitude;
+      longitude = position.coords.longitude;
+
+      console.log("Latitude: " + latitude);
+      console.log("Longitude: " + longitude);
+
+      // Use the coordinates for your application logic
+    },
+    function (error) {
+      // Error callback
+      console.error("Error retrieving location: ", error.message);
+    }
+  );
+} else {
+  console.error("Geolocation is not supported by this browser.");
+}
+
+
+$('#select-filter').on('change', function () {
+    const selectedValue = $(this).val(); // Get the selected value
+
+    // Perform different actions based on the selected filter
+    switch (selectedValue) {
+        case '0':
+            // Example action for Most Booked
+            location.href ="listing.php";
+            break;
+        case '1':
+            // Example action for Most Booked
+            location.href ="listing.php?filter=1";
+            break;
+        case '2':
+            // Example action for Most Heart
+            location.href ="listing.php?filter=2";
+
+            break;
+        case '3':
+            // Example action for Near Me
+            location.href =`listing.php?filter=3&&lat=${latitude}&&long=${longitude}`;
+            break;
+        default:
+            // Default action (e.g., reset the filter)
+            alert('No filter applied.');
+    }
+});
+
+</script>

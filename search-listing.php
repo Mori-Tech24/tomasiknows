@@ -42,21 +42,115 @@ include('includes/dbconnection.php');
                       
                     </div>
                     <div class="row">
+                    <div class="col-md-9">
+        <!-- Listings content -->
+    </div>
+
+
+                    <?php
+// Get the 'filter' value from the query string
+$filter = isset($_GET['filter']) ? $_GET['filter'] : 0;
+?>
+<div class="col-md-3 d-flex justify-content-end align-items-center">
+    <select class="form-control" name="select-filter" id="select-filter">
+        <option value="0" <?php echo $filter == 0 ? 'selected' : ''; ?>>Select Filter</option>
+        <option value="1" <?php echo $filter == 1 ? 'selected' : ''; ?>>Most Booked</option>
+        <option value="2" <?php echo $filter == 2 ? 'selected' : ''; ?>>Most Heart</option>
+        <option value="3" <?php echo $filter == 3 ? 'selected' : ''; ?>>Near Me</option>
+    </select>
+</div>
+
+
+
+
+
+
+
     <?php
 $categories = isset($_GET['categories']) ? $_GET['categories'] : 'all-categories';
 $location = isset($_GET['location']) ? $_GET['location'] : '';
 
+if (isset($_GET['filter']) && $_GET['filter'] == 1) {
+    $sql = "SELECT a.*, 
+                (SELECT COUNT(b.id) 
+                 FROM tbl_reservations b 
+                 WHERE b.listing_id = a.ID AND b.reservation_status = 1) AS reservation_count 
+            FROM tbllisting a 
+            WHERE 1=1  AND  a.isDeleted = 0 
+            "; // Query for Most Booked
 
-    // Build dynamic SQL
-    $sql = "SELECT * FROM tbllisting WHERE 1=1  AND isDeleted = 0"; // Base query
+    if ($categories !== 'all-categories') {
+        $sql .= " AND a.Category = '$categories'";
+    }
 
-    // Add category filter if not "all-categories"
+    // Add location filter
+    $sql .= " AND (a.State LIKE '%$location%') ORDER BY reservation_count DESC";
+
+} else if (isset($_GET['filter']) && $_GET['filter'] == 2) {
+    $sql = "SELECT a.*, 
+                (SELECT COUNT(b.id) 
+                 FROM tbl_listing_ratings b 
+                 WHERE b.listing_id = a.ID) AS rating_count 
+            FROM tbllisting a 
+            WHERE  1=1  AND  isDeleted = 0 
+            "; // Query for Most Heart
+
+if ($categories !== 'all-categories') {
+    $sql .= " AND a.Category = '$categories'";
+}
+
+// Add location filter
+$sql .= " AND (a.State LIKE '%$location%') ORDER BY rating_count DESC";
+
+
+
+} else if (isset($_GET['filter']) && $_GET['filter'] == 3) {
+ // Query for Near Me
+    $get_lat  = isset($_GET['lat']) ? (float)$_GET['lat'] : 0; // Get latitude
+    $get_long = isset($_GET['long']) ? (float)$_GET['long'] : 0; // Get longitude
+
+    // Check if latitude and longitude are valid
+    if ($get_lat && $get_long) {
+        $sql = "SELECT a.*, 
+                    (6371 * acos(
+                        cos(radians($get_long)) * 
+                        cos(radians(a.latitude)) * 
+                        cos(radians(a.longitude) - radians($get_lat)) + 
+                        sin(radians($get_long)) * 
+                        sin(radians(a.latitude))
+                    )) AS distance 
+                FROM tbllisting a 
+                
+                WHERE  1=1  AND  isDeleted = 0 
+                "; // Order by nearest distance
+
+        if ($categories !== 'all-categories') {
+            $sql .= " AND a.Category = '$categories'";
+        }
+
+        // Add location filter
+        $sql .= " AND (a.State LIKE '%$location%') HAVING distance < 50  ORDER BY distance ASC" ;
+
+
+    } else {
+        $sql = "SELECT * FROM tbllisting WHERE  1=1  AND  isDeleted = 0"; // Default query if no lat/long provided
+    }
+} else {
+    $sql = "SELECT * FROM tbllisting WHERE  1=1  AND   isDeleted = 0"; // Default query
+
     if ($categories !== 'all-categories') {
         $sql .= " AND tbllisting.Category = '$categories'";
     }
 
     // Add location filter
     $sql .= " AND (tbllisting.State LIKE '%$location%')";
+}
+
+    // Build dynamic SQL
+    // $sql = "SELECT * FROM tbllisting WHERE 1=1  AND isDeleted = 0";
+
+    // Add category filter if not "all-categories"
+  
 
     $query = $dbh->prepare($sql);
     $query->execute();
@@ -118,3 +212,63 @@ $location = isset($_GET['location']) ? $_GET['location'] : '';
 </body>
 
 </html>
+
+<script>
+
+let latitude  = "";
+let longitude = "";
+
+if (navigator.geolocation) {
+  // Request the current position
+  navigator.geolocation.getCurrentPosition(
+    function (position) {
+      // Success callback
+      latitude = position.coords.latitude;
+      longitude = position.coords.longitude;
+
+      console.log("Latitude: " + latitude);
+      console.log("Longitude: " + longitude);
+
+      // Use the coordinates for your application logic
+    },
+    function (error) {
+      // Error callback
+      console.error("Error retrieving location: ", error.message);
+    }
+  );
+} else {
+  console.error("Geolocation is not supported by this browser.");
+}
+
+
+$('#select-filter').on('change', function () {
+    const selectedValue = $(this).val(); // Get the selected value
+
+    // Perform different actions based on the selected filter
+    switch (selectedValue) {
+        case '0':
+            // Example action for Most Booked
+            location.href =`search-listing.php?categories=<?php echo $_GET['categories']?>&location=<?php echo $_GET['location']?>`;
+            break;
+        case '1':
+            // Example action for Most Booked
+            location.href =`search-listing.php?filter=1&&categories=<?php echo $_GET['categories']?>&&location=<?php echo $_GET['location']?>`;
+         
+            break;
+        case '2':
+            // Example action for Most Heart
+            location.href =`search-listing.php?filter=2&categories=<?php echo $_GET['categories']?>&location=<?php echo $_GET['location']?>`;
+         
+
+            break;
+        case '3':
+            // Example action for Near Me
+            location.href =`search-listing.php?filter=3&&lat=${latitude}&&long=${longitude}&categories=<?php echo $_GET['categories']?>&location=<?php echo $_GET['location']?>`;
+            break;
+        default:
+            // Default action (e.g., reset the filter)
+            alert('No filter applied.');
+    }
+});
+
+</script>
