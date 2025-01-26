@@ -45,7 +45,10 @@ if (isset($_POST['submit'])) {
   $googlelink = $_POST['googlelink'];
   $linkedin = $_POST['linkedin'];
   $description = $_POST['description'];
+  $longitude = $_POST['longitude'];
+  $latitude = $_POST['latitude'];
   $eid = $_GET['editid'];
+
 
   // Handle image uploads
   if (isset($_FILES['logo']) && count($_FILES['logo']['name']) > 0 && $_FILES['logo']['name'][0] !== "") { // Check if files are uploaded
@@ -104,7 +107,10 @@ if (isset($_POST['submit'])) {
               Googlepluslink = :googlelink,
               Linkedinlink = :linkedin,
               Description = :description,
-              Logo = :logo 
+              Logo = :logo,
+                longitude = :longitude,
+                latitude = :latitude
+
           WHERE ID = :eid";
 
   // Prepare and execute the query
@@ -131,7 +137,13 @@ if (isset($_POST['submit'])) {
   $query->bindParam(':linkedin', $linkedin, PDO::PARAM_STR);
   $query->bindParam(':description', $description, PDO::PARAM_STR);
   $query->bindParam(':logo', $newImageList, PDO::PARAM_STR);
+  $query->bindParam(':longitude', $longitude, PDO::PARAM_STR);
+  $query->bindParam(':latitude', $latitude, PDO::PARAM_STR);
+
+
   $query->bindParam(':eid', $eid, PDO::PARAM_INT);
+
+
 
   // Execute the update query
   $query->execute();
@@ -308,6 +320,30 @@ foreach($result2 as $row2)
                             </div>
                             <!--//End Add Location -->
 
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>longitude</label>
+                                        <input type="text" class="form-control add-listing_form" name="longitude" id="longitude" value="<?php  echo $row->longitude;?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>latitude</label>
+                                        <input type="text" class="form-control add-listing_form" name="latitude" id="latitude" value="<?php  echo $row->latitude;?>">
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="button" class="btn btn-primary btngetLoc" style="color:white !important">Get My Current Location</button> <i class="fa fa-info-circle text-primary" title="User to get the current longitude and latitude">What is this?</i>
+                                </div>                     
+                            </div>
+
+                            <br>
+
                             <!-- Full Details -->
                             <div class="listing-title">
                                 <span class="ti-location-pin"></span>
@@ -397,6 +433,9 @@ foreach($result2 as $row2)
                                     </div>
                                 </div>
                             </div>
+
+
+
                             <!--//End Full Details -->
                             <?php $cnt=$cnt+1;}} ?>
                             <!-- Add Gallery -->
@@ -484,6 +523,40 @@ foreach($result2 as $row2)
   });
 </script>
 <script>
+
+  
+$(document).on("click",".btngetLoc", function() {
+
+     
+if (navigator.geolocation) {
+// Request the current position
+navigator.geolocation.getCurrentPosition(
+    function (position) {
+    // Success callback
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+
+    $("#longitude").val(longitude);
+    $("#latitude").val(latitude);
+
+    // console.log("Latitude: " + latitude);
+    // console.log("Longitude: " + longitude);
+
+    // Use the coordinates for your application logic
+    },
+    function (error) {
+    // Error callback
+        alert("Error retrieving location: ", error.message);
+    }
+);
+} else {
+    alert("Geolocation is not supported by this browser.");
+}
+
+
+
+});
+
         // Handle file input for new image uploads and display previews
         document.getElementById("logo").addEventListener("change", function(event) {
             const files = event.target.files;

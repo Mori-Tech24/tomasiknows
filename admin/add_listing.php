@@ -36,6 +36,9 @@ if (isset($_POST['submit'])) {
   $description = $_POST['description'];
   $line_of_business = $_POST['txt_line_of_business'];
   $addressLocation = $_POST['addressLocation'];
+    $longitude = $_POST['longitude'];
+    $latitude = $_POST['latitude'];
+
 
   
 
@@ -72,13 +75,13 @@ if (isset($_POST['submit'])) {
               UserID, ListingTitle, Keyword, Category, Website, Address, TemporaryAddress, City, 
               State, Country, Zipcode, OwnerName, Email, Phone, CompanyWebsite, OwnerDesignation, 
               Company, FacebookLink, TweeterLink, Googlepluslink, Linkedinlink, Description, Logo, 
-              n_line_of_business, Address_location, n_phone_number
+              n_line_of_business, Address_location, n_phone_number, longitude, latitude
           ) 
           VALUES (
               :lssemsuid, :listingtitle, :keywords, :category, :website, :add, :tadd, :city, 
               :state, :country, :zipcode, :ownername, :email, :phone, :comwebsite, :ownerdesi, 
               :company, :flink, :twitterlink, :googlelink, :linkedin, :description, :logo, 
-              :n_line_of_business, :address_location, :n_phone_number
+              :n_line_of_business, :address_location, :n_phone_number, :longitude, :latitude,
           )";
   
   $query = $dbh->prepare($sql);
@@ -108,6 +111,8 @@ if (isset($_POST['submit'])) {
   $query->bindParam(':n_line_of_business', $line_of_business, PDO::PARAM_STR);
   $query->bindParam(':address_location', $addressLocation, PDO::PARAM_STR);
   $query->bindParam(':n_phone_number', $phone, PDO::PARAM_STR);
+  $query->bindParam(':longitude', $longitude, PDO::PARAM_STR);
+  $query->bindParam(':latitude', $latitude, PDO::PARAM_STR);
   
 
   $query->execute();
@@ -298,6 +303,31 @@ if (isset($_POST['submit'])) {
                                 
                             </div>
 
+
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>longitude</label>
+                                        <input type="text" class="form-control add-listing_form" name="longitude" id="longitude">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>latitude</label>
+                                        <input type="text" class="form-control add-listing_form" name="latitude" id="latitude">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="button" class="btn btn-primary btngetLoc" style="color:white !important">Get My Current Location</button> <i class="fa fa-info-circle text-primary" title="User to get the current longitude and latitude">What is this?</i>
+                                </div>                     
+                            </div>
+
+
+                            <br>
                             <div class="row">
                                 <div class="col-md-6 d-none">
                                     <div class="form-group">
@@ -464,6 +494,40 @@ if (isset($_POST['submit'])) {
 </script>
 
 <script>
+
+    $(document).on("click",".btngetLoc", function() {
+
+     
+        if (navigator.geolocation) {
+        // Request the current position
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+            // Success callback
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            $("#longitude").val(longitude);
+            $("#latitude").val(latitude);
+
+            // console.log("Latitude: " + latitude);
+            // console.log("Longitude: " + longitude);
+
+            // Use the coordinates for your application logic
+            },
+            function (error) {
+            // Error callback
+                alert("Error retrieving location: ", error.message);
+            }
+        );
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+
+
+
+    });
+
+
     document.getElementById("logo").addEventListener("change", function(event) {
         const files = event.target.files;
         const previewContainer = document.getElementById("image-previews");
