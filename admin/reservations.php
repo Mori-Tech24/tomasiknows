@@ -8,6 +8,8 @@ include('includes/dbconnection.php');
 
 // } 
 
+
+
 if (strlen($_SESSION['lssemsaid'] == 0)) {
   header('location:logout.php');
 } else {
@@ -17,6 +19,8 @@ if (strlen($_SESSION['lssemsaid'] == 0)) {
     $action = $_GET['action']; // Either 'approve' or 'reject'
     $action_by = $_SESSION['lssemsaid'];  // Logged-in user ID
     $action_date = date('Y-m-d H:i:s');  // Current date and time
+    $reservation_remarks = $_GET['reject_reason'];  // Current date and time
+
 
     // Determine the new status based on the action
     if ($action == 'approve') {
@@ -44,12 +48,13 @@ if (strlen($_SESSION['lssemsaid'] == 0)) {
 
             // Update the reservation status, action_by, and action_date
             $sql = "UPDATE tbl_reservations 
-                    SET reservation_status = :status, action_by = :action_by, action_date = :action_date
+                    SET reservation_status = :status, action_by = :action_by, action_date = :action_date, reservation_remarks = :reservation_remarks
                     WHERE id = :rid";
             $query = $dbh->prepare($sql);
             $query->bindParam(':status', $new_status, PDO::PARAM_INT);
             $query->bindParam(':action_by', $action_by, PDO::PARAM_INT);
             $query->bindParam(':action_date', $action_date, PDO::PARAM_STR);
+            $query->bindParam(':reservation_remarks', $reservation_remarks, PDO::PARAM_STR);
             $query->bindParam(':rid', $rid, PDO::PARAM_INT);
             $query->execute();
 
@@ -57,20 +62,22 @@ if (strlen($_SESSION['lssemsaid'] == 0)) {
             $apiKey = "1def7651eddb998a05492b48938afb61"; // Replace with your Semaphore API key
             $senderName = "TomasiKnows"; // Optional: Replace with your desired sender name
 
-            $ch = curl_init();
+            // sema start
+            // $ch = curl_init();
+            // curl_setopt($ch, CURLOPT_URL, "https://api.semaphore.co/api/v4/messages");
+            // curl_setopt($ch, CURLOPT_POST, 1);
+            // curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+            //     'apikey' => $apiKey,
+            //     'number' => $mobileNumber,
+            //     'message' => $message,
+            //     'sendername' => $senderName,
+            // ]));
+            // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-            curl_setopt($ch, CURLOPT_URL, "https://api.semaphore.co/api/v4/messages");
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-                'apikey' => $apiKey,
-                'number' => $mobileNumber,
-                'message' => $message,
-                'sendername' => $senderName,
-            ]));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            // $response = curl_exec($ch);
+            // curl_close($ch);
+            // sema end
 
-            $response = curl_exec($ch);
-            curl_close($ch);
 
             // Decode Semaphore response and handle errors if necessary
             echo "<script>alert('Reservation Updated.');</script>";
@@ -123,6 +130,37 @@ if (strlen($_SESSION['lssemsaid'] == 0)) {
         </div>
       </div>
     </section>
+
+
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="rejectModalLabel">Reject Reservation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="rejectForm" method="GET">
+
+          <input type="hidden" name="action_id" id="action_id">
+          
+          <input type="hidden" name="action" id="action" value="reject">
+
+          
+          <input type="hidden" id="reject_reservation_id" name="reservation_id">
+          <div class="mb-3">
+            <label for="reject_reason" class="form-label">Reason for Rejection</label>
+            <textarea class="form-control" id="reject_reason" name="reject_reason" rows="4" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-danger">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <section class="content">
       <div class="row">
@@ -225,9 +263,12 @@ AND a.listing_id IN (SELECT id FROM tbllisting WHERE UserID = ".$_SESSION['lssem
                                onclick="return confirm('Are you sure you want to approve this reservation?');">
                                <i class="fa fa-check" aria-hidden="true"></i> Approve
                             </a> |
-                            <a href="reservations.php?action_id=<?php echo htmlentities($row->id); ?>&action=reject" 
+                            <!-- <a href="reservations.php?action_id=<?php echo htmlentities($row->id); ?>&action=reject" 
                                onclick="return confirm('Are you sure you want to reject this reservation?');">
                                <i class="fa fa-times" aria-hidden="true"></i> Reject
+                            </a> -->
+                            <a href="#" class="reject-btn" data-id="<?php echo htmlentities($row->id); ?>">
+                                <i class="fa fa-times" aria-hidden="true"></i> Reject
                             </a>
                           </td>
                         </tr>
@@ -330,6 +371,7 @@ AND a.listing_id IN (SELECT id FROM tbllisting WHERE UserID = ".$_SESSION['lssem
                         <th>Reservation Date</th>
                         <th>Reservation Purpose</th>
                         <th>Date Submitted</th>
+                        <th>Reject Remarks</th>
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -353,7 +395,7 @@ AND a.listing_id IN (SELECT id FROM tbllisting WHERE UserID = ".$_SESSION['lssem
 
                       $sql = "SELECT a.id, c.Fullname, b.ListingTitle, a.mobile_no,
                               CONCAT(a.reservation_date, ' ', a.reservation_time) AS reservationdate, 
-                              a.reservation_purpose, a.date_submitted, a.reservation_status
+                              a.reservation_purpose, a.date_submitted, a.reservation_status, a.reservation_remarks
                               FROM tbl_reservations a
                               LEFT JOIN tbllisting b ON b.ID = a.listing_id
                               LEFT JOIN tbluser c ON c.id = a.user_id
@@ -378,6 +420,7 @@ AND a.listing_id IN (SELECT id FROM tbllisting WHERE UserID = ".$_SESSION['lssem
                           <td><?php echo htmlentities($row->reservationdate); ?></td>
                           <td><?php echo htmlentities($row->reservation_purpose); ?></td>
                           <td><?php echo htmlentities($row->date_submitted); ?></td>
+                          <td><?php echo htmlentities($row->reservation_remarks); ?></td>
                           <td>Rejected</td>
                         </tr>
                       <?php 
@@ -408,6 +451,37 @@ AND a.listing_id IN (SELECT id FROM tbllisting WHERE UserID = ".$_SESSION['lssem
     $('#pendingTable').DataTable();
     $('#approvedTable').DataTable();
     $('#rejectedTable').DataTable();
+
+    $(document).on("click", ".reject-btn" , function (){ 
+      var actid = $(this).data("id");
+      $("#action_id").val(actid);
+      $("#rejectModal").modal("show");
+    });
+  
+    // document.querySelectorAll('.reject-btn').forEach(button => {
+    //     button.addEventListener('click', function() {
+    //         let reservationId = this.getAttribute('data-id');
+    //         document.getElementById('reject_reservation_id').value = reservationId;
+    //     });
+    // });
+
+    // // Handle Form Submission
+    // document.getElementById('rejectForm').addEventListener('submit', function(e) {
+    //     e.preventDefault();
+        
+    //     let formData = new FormData(this);
+
+    //     fetch('reject_reservation.php', {
+    //         method: 'POST',
+    //         body: formData
+    //     })
+    //     .then(response => response.text())
+    //     .then(data => {
+    //         alert(data); // Display response message
+    //         location.reload(); // Reload the page to update the table
+    //     })
+    //     .catch(error => console.error('Error:', error));
+    // });
   });
 </script>
 
