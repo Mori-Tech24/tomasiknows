@@ -111,8 +111,9 @@ if (isset($_POST['submit'])) {
   $query->bindParam(':n_line_of_business', $line_of_business, PDO::PARAM_STR);
   $query->bindParam(':address_location', $addressLocation, PDO::PARAM_STR);
   $query->bindParam(':n_phone_number', $phone, PDO::PARAM_STR);
-  $query->bindParam(':longitude', $longitude, PDO::PARAM_STR);
-  $query->bindParam(':latitude', $latitude, PDO::PARAM_STR);
+  $query->bindParam(':longitude', $latitude, PDO::PARAM_STR);
+  $query->bindParam(':latitude', $longitude, PDO::PARAM_STR);
+
   
 
   $query->execute();

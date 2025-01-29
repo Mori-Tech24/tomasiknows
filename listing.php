@@ -99,17 +99,21 @@ if (isset($_GET['filter']) && $_GET['filter'] == 1) {
     // Check if latitude and longitude are valid
     if ($get_lat && $get_long) {
         $sql = "SELECT a.*, 
-                    (6371 * acos(
-                        cos(radians($get_long)) * 
-                        cos(radians(a.latitude)) * 
-                        cos(radians(a.longitude) - radians($get_lat)) + 
-                        sin(radians($get_long)) * 
-                        sin(radians(a.latitude))
-                    )) AS distance 
-                FROM tbllisting a 
-                WHERE isDeleted = 0 
-                HAVING distance < 50 -- Distance filter in kilometers
-                ORDER BY distance ASC"; // Order by nearest distance
+                        (6371 * ACOS(
+                            COS(RADIANS($get_lat)) * 
+                            COS(RADIANS(a.latitude)) * 
+                            COS(RADIANS(a.longitude) - RADIANS($get_long)) + 
+                            SIN(RADIANS($get_lat)) * 
+                            SIN(RADIANS(a.latitude))
+                        )) AS DISTANCE 
+                    FROM tbllisting a 
+                    WHERE isDeleted = 0
+                    AND latitude IS NOT NULL 
+                    AND longitude IS NOT NULL
+                    HAVING DISTANCE <= 4 -- Limit to 4 km radius
+                    ORDER BY DISTANCE ASC";
+
+
     } else {
         $sql = "SELECT * FROM tbllisting WHERE isDeleted = 0"; // Default query if no lat/long provided
     }

@@ -28,7 +28,7 @@ if (strlen($_SESSION['lssemsaid'] == 0)) {
         $message = "Your reservation has been approved. Thank you!";
     } elseif ($action == 'reject') {
         $new_status = 2;  // Rejected status
-        $message = "Your reservation has been rejected. Please contact us for more information.";
+        $message = "Your reservation has been rejected. " . $reservation_remarks;
     }
 
     try {
@@ -63,21 +63,20 @@ if (strlen($_SESSION['lssemsaid'] == 0)) {
             $senderName = "TomasiKnows"; // Optional: Replace with your desired sender name
 
             // sema start
-            // $ch = curl_init();
-            // curl_setopt($ch, CURLOPT_URL, "https://api.semaphore.co/api/v4/messages");
-            // curl_setopt($ch, CURLOPT_POST, 1);
-            // curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-            //     'apikey' => $apiKey,
-            //     'number' => $mobileNumber,
-            //     'message' => $message,
-            //     'sendername' => $senderName,
-            // ]));
-            // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "https://api.semaphore.co/api/v4/messages");
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                'apikey' => $apiKey,
+                'number' => $mobileNumber,
+                'message' => $message,
+                'sendername' => $senderName,
+            ]));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-            // $response = curl_exec($ch);
-            // curl_close($ch);
-            // sema end
-
+            $response = curl_exec($ch);
+            curl_close($ch);
+       
 
             // Decode Semaphore response and handle errors if necessary
             echo "<script>alert('Reservation Updated.');</script>";

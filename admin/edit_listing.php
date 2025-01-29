@@ -137,8 +137,8 @@ if (isset($_POST['submit'])) {
   $query->bindParam(':linkedin', $linkedin, PDO::PARAM_STR);
   $query->bindParam(':description', $description, PDO::PARAM_STR);
   $query->bindParam(':logo', $newImageList, PDO::PARAM_STR);
-  $query->bindParam(':longitude', $longitude, PDO::PARAM_STR);
-  $query->bindParam(':latitude', $latitude, PDO::PARAM_STR);
+  $query->bindParam(':longitude', $latitude, PDO::PARAM_STR);
+  $query->bindParam(':latitude', $longitude, PDO::PARAM_STR);
 
 
   $query->bindParam(':eid', $eid, PDO::PARAM_INT);
