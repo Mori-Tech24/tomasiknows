@@ -123,8 +123,7 @@ $sql .= " AND (a.State LIKE '%$location%') ORDER BY rating_count DESC";
                     WHERE isDeleted = 0
                     AND latitude IS NOT NULL 
                     AND longitude IS NOT NULL
-                    HAVING DISTANCE <= 4 -- Limit to 4 km radius
-                    ORDER BY DISTANCE ASC
+                    
 
                 "; // Order by nearest distance
 
@@ -133,7 +132,8 @@ $sql .= " AND (a.State LIKE '%$location%') ORDER BY rating_count DESC";
         }
 
         // Add location filter
-        $sql .= " AND (a.State LIKE '%$location%') HAVING distance < 50  ORDER BY distance ASC" ;
+        $sql .= " AND (a.State LIKE '%$location%')  HAVING DISTANCE <= 4 
+                    ORDER BY DISTANCE ASC" ;
 
 
     } else {
